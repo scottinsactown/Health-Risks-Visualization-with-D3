@@ -61,6 +61,13 @@ function renderCircles(circlesGroup, newXScale, chosenXAxis) {
     return circlesGroup;
 }
 
+// Function to update circle labels
+function renderLabels(circleLabels, newXScale, chosenXAxis) {
+    circleLabels.transition()
+    .duration(1000)
+    .attr("cx",d=> newXScale(d[chosenXAxis]));
+}
+
 // Function used to update tooltip
 function updateToolTip(chosenXAxis, circlesGroup) {
 
@@ -137,19 +144,20 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
         .attr("fill", "pink")
         .attr("opacity", ".5");
 
-        // have to transform
-        let circleLabels = chartGroup.selectAll(null).data(healthdata).enter().append("text");
-
-        circleLabels
-          .attr("x", d => xLinearScale(d[chosenXAxis]))
-          .attr("y", d => yLinearScale(d.income)+5) // minor placement adjustment
-          .text(function(d) {
-            return d.abbr;
-          })
-          .attr("font-family", "sans-serif")
-          .attr("font-size", "16px")
-          .attr("text-anchor", "middle")
-          .attr("fill", "white");
+        // Apply labels to circles
+        let circleLabels = chartGroup.selectAll(null)
+        .data(healthdata)
+        .enter()
+        .append("text")
+        .attr("x", d => xLinearScale(d[chosenXAxis]))
+        .attr("y", d => yLinearScale(d.income)+5) // minor placement adjustment
+        .text(function(d) {
+        return d.abbr;
+        })
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "16px")
+        .attr("text-anchor", "middle")
+        .attr("fill", "white");
 
     // Create group for 3 x-axis labels
     let labelsGroup = chartGroup.append("g")
@@ -200,7 +208,23 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
                 xAxis = renderAxes(xLinearScale, xAxis);
                 circlesGroup = renderCircles(circlesGroup, xLinearScale, chosenXAxis);
                 circlesGroup = updateToolTip(chosenXAxis, circlesGroup);
+                // circleLabels = renderLabels(circleLabels, xLinearScale, chosenXAxis);
+
+                // Move circle labels
+                circleLabels
+                .transition()
+                .duration(1000)
+                .attr("x", d => xLinearScale(d[chosenXAxis]))
+                .attr("y", d => yLinearScale(d.income)+5) // minor placement adjustment
+                .text(function(d) {
+                  return d.abbr;
+                })
+                .attr("font-family", "sans-serif")
+                .attr("font-size", "16px")
+                .attr("text-anchor", "middle")
+                .attr("fill", "white");
                 
+                // Highlight active choice
                 if (chosenXAxis === "smokes") {
                     smokesLabel
                         .classed("active", true)
