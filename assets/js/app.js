@@ -5,9 +5,9 @@ let svgWidth = 960 //850; // defering to viewBox below but this still sets overa
 let svgHeight = 500 //850; // defering to viewBox below
 
 let margin = {
-    top:100,
+    top:20,
     right: 40,
-    bottom: 100,
+    bottom: 80,
     left: 100
 };
 
@@ -133,6 +133,8 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
 d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
     if (err) throw err;
 
+
+
     // Parse data
     healthdata.forEach(function(data) {
         data.obesity = +data.obesity;
@@ -142,6 +144,9 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
         data.age = +data.age;
         data.poverty = +data.poverty;
     });
+
+    let chosenXAxis = "smokes"; // or global?
+    let chosenYAxis = "income";
 
     // Set axes scales
     let xLinearScale = xScale(healthdata, chosenXAxis);
@@ -231,30 +236,30 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
     // let labelsYGroup = chartGroup.append("g")
     // .attr("transform", `translate(${width / 2}, ${height + 20})`)
 
-    let incomeLabel = labelsGroup.append("text")
+    let incomeLabel = chartGroup.append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", 0 - margin.left)
-        .attr("x", 20 - (height / 2))
+        .attr("x", 0 - (height / 2))
         .attr("dy", "1em")
         .attr("value", "income")
         .classed("active", true)
         .classed('axis-text', true)
         .text("Income (Median)");
 
-    let ageLabel = labelsGroup.append("text")
+    let ageLabel = chartGroup.append("text")
        .attr("transform", "rotate(-90)")
-      .attr("y", 0 - margin.left)
-      .attr("x", 40 - (height / 2))
+      .attr("y", 20 - margin.left)
+      .attr("x", 0 - (height / 2))
       .attr("dy", "1em")
       .attr("value", "age")
       .classed("inactive", true)
       .classed('axis-text', true)
       .text("Age (Median");
 
-    let povertyLabel = labelsGroup.append("text")
+    let povertyLabel = chartGroup.append("text")
         .attr("transform", "rotate(-90)")
-        .attr("y", 0 - margin.left)
-        .attr("x", 60 - (height / 2))
+        .attr("y", 40 - margin.left)
+        .attr("x", 0 - (height / 2))
         .attr("dy", "1em")
         .attr("value", "poverty")
         .classed('axis-text', true)
@@ -274,11 +279,12 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
     circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
 
     // X axis labels event listener
-    labelsGroup.selectAll(".axis-text")
+    chartGroup.selectAll("text")
         .on("click", function() {
             let value = d3.select(this).attr("value");
-            if (value === "smoking" || value === "obesity" || value === "healthcare") {
-            if (value !== chosenXAxis) {
+            console.log(value);
+            if (value === "smokes" || value === "obesity" || value === "healthcare") {
+                if (value !== chosenXAxis) {
                 chosenXAxis = value;
                 console.log(chosenXAxis);
 
@@ -337,8 +343,10 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
                         .classed("inactive", false);                    
                 }
             }
+            console.log(value);
         }
-        else {
+        else if 
+         (value === "income" || value === "age" || value === "poverty") {
             if (value !== chosenYAxis) {
                 chosenYAxis = value
                 console.log(chosenYAxis);
@@ -346,8 +354,8 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
                 yLinearScale = yScale(healthdata, chosenYAxis);
                 // xAxis = renderXAxes(xLinearScale, xAxis);
                 yAxis = renderYAxes(yLinearScale, yAxis);
-                circlesGroup = renderCircles(circlesGroup, yLinearScale, chosenYAxis);
-                circlesGroup = updateToolTip(chosenXAvis, chosenYAxis, circlesGroup);
+                circlesGroup = renderCircles(circlesGroup, xLinearScale, yLinearScale, chosenXAxis, chosenYAxis);
+                circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
                 circleLabels = renderLabels(circleLabels, xLinearScale, yLinearScale, chosenXAxis, chosenYAxis);
 
                 // Move circle labels
@@ -377,7 +385,7 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
                         .classed("inactive", true);    
        
                     }
-                else if (chosenXAxis === "age") {
+                else if (chosenYAxis === "age") {
                     incomeLabel
                         .classed("active", false)
                         .classed("inactive", true);
