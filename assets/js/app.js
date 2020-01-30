@@ -1,8 +1,8 @@
 // *** D3 Health Risk Analysis ***
 
 // Set starting dimensions
-let svgWidth = 850; // defering to viewBox below
-let svgHeight = 600; // defering to viewBox below
+let svgWidth = 960 //850; // defering to viewBox below but this still sets overall shape of plot
+let svgHeight = 500 //850; // defering to viewBox below
 
 let margin = {
     top:100,
@@ -11,16 +11,16 @@ let margin = {
     left: 100
 };
 
-let width = svgWidth - margin.left - margin.right; //called in labelsGroup
-let height = svgHeight - margin.top - margin.bottom; //called in LabelsGroup
+let width = svgWidth - margin.left - margin.right; //called in xScale and labelsGroup
+let height = svgHeight - margin.top - margin.bottom; //called in yLinearScale and labelsGroup
 
 // SVG wrapper
 let svg = d3
     .select("#scatter")
     .append("svg")
-    // .attr("width", svgWidth) // defering to viewBox below
-    // .attr("height", svgHeight) // defering to viewBox below
-    .attr("viewBox", `-0 -50 800 1000`);
+    .attr("width", svgWidth) // defering to viewBox below
+    .attr("height", svgHeight) // defering to viewBox below
+    // .attr("viewBox", `-0 -50 800 1000`);
 
 // Append SVG group
 let chartGroup = svg.append("g")
@@ -32,8 +32,8 @@ let chosenXAxis = "smokes";
 // Function to update x scale
 function xScale(healthdata, chosenXAxis) {
     let xLinearScale = d3.scaleLinear()
-        .domain([d3.min(healthdata, d=> d[chosenXAxis]) * 0.8,
-        d3.max(healthdata, d => d[chosenXAxis]) * 1.1 //was 1.2 - make sure all fits
+        .domain([d3.min(healthdata, d=> d[chosenXAxis]) * 0.8, //try .9 - make sure all fits
+        d3.max(healthdata, d => d[chosenXAxis]) * 1.2 //try 1.1 - make sure all fits
         ])
         .range([0,width]);
 
@@ -75,10 +75,10 @@ function updateToolTip(chosenXAxis, circlesGroup) {
       }
 
     let toolTip = d3.tip()
-        .attr("class", "tooltip") //.d3-tip?
+        .attr("class", "tooltip") 
         .offset([80,-60])
         .html(function(d) {
-            return(`${d.income} ${label} ${d[chosenXAxis]}`);
+            return(`${d.state}<br>${d.income} <br>${label} ${d[chosenXAxis]}`);
         });
 
     circlesGroup.call(toolTip);
@@ -104,6 +104,8 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
         data.smokes = +data.smokes;
         data.healthcare = +data.healthcare;
         data.income = +data.income;
+        data.age = +data.age;
+        data.poverty = +data.poverty;
     });
 
     // Set axes scales
@@ -135,8 +137,22 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
         .attr("fill", "pink")
         .attr("opacity", ".5");
 
+        // have to transform
+        let circleLabels = chartGroup.selectAll(null).data(healthdata).enter().append("text");
+
+        circleLabels
+          .attr("x", d => xLinearScale(d[chosenXAxis]))
+          .attr("y", d => yLinearScale(d.income)+5) // minor placement adjustment
+          .text(function(d) {
+            return d.abbr;
+          })
+          .attr("font-family", "sans-serif")
+          .attr("font-size", "16px")
+          .attr("text-anchor", "middle")
+          .attr("fill", "white");
+
     // Create group for 3 x-axis labels
-    let labelsGroup = circlesGroup.append("g")
+    let labelsGroup = chartGroup.append("g")
         .attr("transform", `translate(${width / 2}, ${height + 20})`)
     
     let smokesLabel = labelsGroup.append("text")
@@ -144,30 +160,30 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
         .attr("y", 20)
         .attr("value", "smokes")
         .classed("active", true)
-        .text("Smokes ***");
+        .text("Smokes (%)");
 
     let obesityLabel = labelsGroup.append("text")
         .attr("x", 0)
-        .attr("y", 20)
+        .attr("y", 40)
         .attr("value", "obesity")
         .classed("inactive", true)
-        .text("Obesity ***");
+        .text("Obesity (%)");
 
     let healthcareLabel = labelsGroup.append("text")
         .attr("x", 0)
-        .attr("y", 20)
+        .attr("y", 60)
         .attr("value", "healthcare")
         .classed("inactive", true)
-        .text("Healthcare ***");
+        .text("Healthcare (%)");
     
     // append y axis
     chartGroup.append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", 0 - margin.left)
-        .attr("x", 0 - (height / 2))
+        .attr("x", 40 - (height / 2))
         .attr("dy", "1em")
         .classed("axis-text", true)
-        .text("Income ***");
+        .text("Income (Median)");
     
     // Update tooltip
     circlesGroup = updateToolTip(chosenXAxis, circlesGroup);
