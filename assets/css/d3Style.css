@@ -39,18 +39,18 @@
   display: block;
   margin: 0;
 }
-
+/* 
 .d3-tip {
   padding: 6px;
   font-size: 12px;
   line-height: 1;
   line-height: 1.5em;
-  color: #fff;
+  color:red;
   text-align: center;
   text-transform: capitalize;
   background: rgba(0, 0, 0, 0.8);
   border-radius: 4px;
-}
+} */
 
 /* Mobile Rules */
 @media screen and (max-width: 530px) {

@@ -30,4 +30,24 @@ body {
   font-size: 16px;
 }
 
+.container {
+  margin-left: 20px;
+}
 
+.tooltip {
+  padding: 6px;
+  font-size: 12px;
+  line-height: 1;
+  line-height: 1.5em;
+  color:black;
+  text-align: center;
+  text-transform: capitalize;
+  background: wheat;
+  border-radius: 4px;
+}
+
+/* .infolayer [class^='y'][class$='ylabel'] {
+  transform: rotate(0deg); translate: (-10px,-10px);
+  position: absolute;
+}
+ */
