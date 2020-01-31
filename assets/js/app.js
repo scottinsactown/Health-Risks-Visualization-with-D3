@@ -12,7 +12,7 @@ if (!svgArea.empty()) {
 
 let margin = {
     top:20,
-    right: 125,
+    right: 175,
     bottom: 110,
     left: 100
 };
@@ -183,8 +183,11 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
         .attr("fill", "blue")
         .attr("opacity", ".7");
 
-        // Apply labels to circles
-        let circleLabels = chartGroup.append("g")
+        // Highlight CA (first data row in CSV and therefore first circle)
+        chartGroup.select("circle").attr("fill", "red")
+        
+    // Apply labels to circles
+    let circleLabels = chartGroup.append("g")
         .selectAll(null)
         .data(healthdata)
         .enter()
@@ -200,11 +203,10 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
         .attr("fill", "white");
 
     // Create group for 3 X-axis labels
-    let labelsGroup = chartGroup.append("g")
-        // .attr("transform", `translate(${width / 2}, ${height + 20})`)
-    
-    let smokesLabel = labelsGroup
+    let labelsGroupX = chartGroup.append("g")
         .attr("transform", `translate(${width / 2}, ${height + 20})`)
+    
+    let smokesLabel = labelsGroupX
         .append("text")
         .attr("x", 0)
         .attr("y", 20)
@@ -212,8 +214,7 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
         .classed("active", true)
         .text("Smokes (%)");
 
-    let obesityLabel = labelsGroup
-        .attr("transform", `translate(${width / 2}, ${height + 20})`)
+    let obesityLabel = labelsGroupX
         .append("text")
         .attr("x", 0)
         .attr("y", 40)
@@ -221,8 +222,7 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
         .classed("inactive", true)
         .text("Obesity (%)");
 
-    let healthcareLabel = labelsGroup
-        .attr("transform", `translate(${width / 2}, ${height + 20})`)
+    let healthcareLabel = labelsGroupX
         .append("text")
         .attr("x", 0)
         .attr("y", 60)
@@ -231,9 +231,11 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
         .text("Healthcare (%)");
     
 // Create group for 3 Y-axis labels
-
-    let incomeLabel = chartGroup.append("text")
+    let labelsGroupY = chartGroup.append("g")
         .attr("transform", "rotate(0)")
+
+    let incomeLabel = labelsGroupY
+        .append("text")
         .attr("y", 100)
         .attr("x", -125)
         .attr("dy", "1em")
@@ -241,8 +243,8 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
         .classed("active", true)
         .text("Income (Median)");
 
-    let ageLabel = chartGroup.append("text")
-       .attr("transform", "rotate(0)")
+    let ageLabel = labelsGroupY
+      .append("text")
       .attr("y", 120)
       .attr("x", -125)
       .attr("dy", "1em")
@@ -250,8 +252,8 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
       .classed("inactive", true)
       .text("Age (Median)");
 
-    let povertyLabel = chartGroup.append("text")
-        .attr("transform", "rotate(0)")
+    let povertyLabel = labelsGroupY
+        .append("text")
         .attr("y", 140)
         .attr("x", -125)
         .attr("dy", "1em")
@@ -266,11 +268,9 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
     chartGroup.selectAll("text")
         .on("click", function() {
             let value = d3.select(this).attr("value");
-            console.log(value);
             if (value === "smokes" || value === "obesity" || value === "healthcare") {
                 if (value !== chosenXAxis) {
                 chosenXAxis = value;
-                console.log(chosenXAxis);
 
                 xLinearScale = xScale(healthdata, chosenXAxis);
                 xAxis = renderXAxes(xLinearScale, xAxis);
@@ -326,13 +326,11 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
                         .classed("inactive", false);                    
                 }
             }
-            console.log(value);
         }
         else if 
          (value === "income" || value === "age" || value === "poverty") {
             if (value !== chosenYAxis) {
                 chosenYAxis = value
-                console.log(chosenYAxis);
 
                 yLinearScale = yScale(healthdata, chosenYAxis);
                 yAxis = renderYAxes(yLinearScale, yAxis);
