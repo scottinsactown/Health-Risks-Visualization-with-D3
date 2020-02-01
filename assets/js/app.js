@@ -7,7 +7,7 @@ var svgArea = d3.select("body").select("svg");
 if (!svgArea.empty()) {
     svgArea.remove();
   }
-  var svgHeight = window.innerHeight;
+  var svgHeight = window.innerHeight-70;
   var svgWidth = window.innerWidth;
 
 let margin = {
