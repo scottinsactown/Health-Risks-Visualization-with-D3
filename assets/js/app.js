@@ -1,14 +1,18 @@
 // *** D3 Health Risk Analysis ***
 
+// Default values for chart
+let clickedXvalue = "smokes"; 
+let clickedYvalue= "income";
+
 function makeResponsive() {
 
 // Set starting dimensions    
-var svgArea = d3.select("body").select("svg");
+let svgArea = d3.select("body").select("svg");
 if (!svgArea.empty()) {
     svgArea.remove();
   }
-  var svgHeight = window.innerHeight-70;
-  var svgWidth = window.innerWidth;
+let svgHeight = window.innerHeight-70;
+let svgWidth = window.innerWidth;
 
 let margin = {
     top:20,
@@ -31,7 +35,7 @@ let svg = d3
 let chartGroup = svg.append("g")
     .attr("transform", `translate(${margin.left+100},${margin.top})`);
 
-// Function to update X scale
+// ** Function to update X scale
 function xScale(healthdata, chosenXAxis) {
     let xLinearScale = d3.scaleLinear()
         .domain([d3.min(healthdata, d=> d[chosenXAxis]) * 0.8,
@@ -41,7 +45,7 @@ function xScale(healthdata, chosenXAxis) {
     return xLinearScale;
 }
 
-//Function to update Y scale
+// ** Function to update Y scale
 function yScale(healthdata, chosenYAxis) {
     let yLinearScale = d3.scaleLinear()
         .domain([d3.min(healthdata, d=> d[chosenYAxis]) * 0.8, 
@@ -51,7 +55,7 @@ function yScale(healthdata, chosenYAxis) {
     return yLinearScale;
 }
 
-// Function to update X axis
+// *** Function to update X axis
 function renderXAxes(newXScale, xAxis) {
     let bottomAxis = d3.axisBottom(newXScale);
     xAxis.transition()
@@ -60,7 +64,7 @@ function renderXAxes(newXScale, xAxis) {
     return xAxis;
 }
 
-// Function to update Y axis
+// ** Function to update Y axis
 function renderYAxes(newYScale, yAxis) {
     let leftAxis = d3.axisLeft(newYScale);
     yAxis.transition()
@@ -69,7 +73,7 @@ function renderYAxes(newYScale, yAxis) {
     return yAxis;
 }
 
-//Function to update circles
+// ** Function to update circles
 function renderCircles(circlesGroup, newXScale, newYScale, chosenXAxis, chosenYAxis) {
     circlesGroup.transition()
     .duration(1000)
@@ -78,7 +82,7 @@ function renderCircles(circlesGroup, newXScale, newYScale, chosenXAxis, chosenYA
     return circlesGroup;
 }
 
-// Function to update circle labels
+// ** Function to update circle labels
 function renderLabels(circleLabels, newXScale, newYScale, chosenXAxis, chosenYAxis) {
     circleLabels.transition()
     .duration(1000)
@@ -87,7 +91,7 @@ function renderLabels(circleLabels, newXScale, newYScale, chosenXAxis, chosenYAx
     return circleLabels;
 }
 
-// Function to update tooltip
+// ** Function to update tooltip
 function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
 
     if (chosenXAxis === "smokes") {
@@ -137,11 +141,11 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
     return circlesGroup;
 }
 
-// Get data from CSV
+// ** Get data from CSV
 d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
     if (err) throw err;
 
-    // Parse data
+    // ** Parse data
     healthdata.forEach(function(data) {
         data.obesity = +data.obesity;
         data.smokes = +data.smokes;
@@ -151,9 +155,9 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
         data.poverty = +data.poverty;
     });
 
-    // Set chart defaults
-    let chosenXAxis = "smokes"; 
-    let chosenYAxis = "income";
+    // Use defaults for chart unless user has selected other options already
+    chosenXAxis = clickedXvalue; 
+    chosenYAxis = clickedYvalue;
 
     // Set axes scales
     let xLinearScale = xScale(healthdata, chosenXAxis);
@@ -206,71 +210,108 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
     let labelsGroupX = chartGroup.append("g")
         .attr("transform", `translate(${width / 2}, ${height + 20})`)
     
-    let smokesLabel = labelsGroupX
+    var smokesLabel = labelsGroupX
         .append("text")
         .attr("x", 0)
         .attr("y", 20)
         .attr("value", "smokes")
-        .classed("active", true)
+        .classed("active", false)
+        .classed("inactive", true)
         .text("Smokes (%)");
 
-    let obesityLabel = labelsGroupX
+        if (chosenXAxis === "smokes") {
+        smokesLabel.classed("active", true)
+        .classed("inactive",false);
+        }   
+
+    var obesityLabel = labelsGroupX
         .append("text")
         .attr("x", 0)
         .attr("y", 40)
         .attr("value", "obesity")
+        .classed("active", false)
         .classed("inactive", true)
         .text("Obesity (%)");
 
-    let healthcareLabel = labelsGroupX
+        if (chosenXAxis === "obesity") {
+        obesityLabel.classed("active", true)
+        .classed("inactive",false);
+        }
+
+    var healthcareLabel = labelsGroupX
         .append("text")
         .attr("x", 0)
         .attr("y", 60)
         .attr("value", "healthcare")
+        .classed("active", false)
         .classed("inactive", true)
-        .text("Healthcare (%)");
+        .text("Lacking Healthcare (%)");
     
-// Create group for 3 Y-axis labels
-    let labelsGroupY = chartGroup.append("g")
+        if (chosenXAxis === "healthcare") {
+            healthcareLabel.classed("active", true)
+            .classed("inactive",false);
+            }
+
+    // Create group for 3 Y-axis labels
+    var labelsGroupY = chartGroup.append("g")
         .attr("transform", "rotate(0)")
 
-    let incomeLabel = labelsGroupY
+    var incomeLabel = labelsGroupY
         .append("text")
         .attr("y", 100)
         .attr("x", -125)
         .attr("dy", "1em")
         .attr("value", "income")
-        .classed("active", true)
+        .classed("active", false)
+        .classed("inactive", true)
         .text("Income (Median)");
 
-    let ageLabel = labelsGroupY
+        if (chosenYAxis === "income") {
+            incomeLabel.classed("active", true)
+            .classed("inactive",false);
+            }
+
+    var ageLabel = labelsGroupY
       .append("text")
       .attr("y", 120)
       .attr("x", -125)
       .attr("dy", "1em")
       .attr("value", "age")
+      .classed("active", false)
       .classed("inactive", true)
       .text("Age (Median)");
 
-    let povertyLabel = labelsGroupY
+        if (chosenYAxis === "age") {
+        ageLabel.classed("active", true)
+        .classed("inactive",false);
+        }
+
+    var povertyLabel = labelsGroupY
         .append("text")
         .attr("y", 140)
         .attr("x", -125)
         .attr("dy", "1em")
         .attr("value", "poverty")
+        .classed("active", false)
         .classed("inactive", true)
         .text("Poverty (%)");
 
+        if (chosenYAxis === "poverty") {
+            povertyLabel.classed("active", true)
+            .classed("inactive",false);
+            }
+      
     // Update tooltip
     circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
 
-    // X axis labels event listener
+    // ** X axis labels event listener
     chartGroup.selectAll("text")
         .on("click", function() {
             let value = d3.select(this).attr("value");
             if (value === "smokes" || value === "obesity" || value === "healthcare") {
                 if (value !== chosenXAxis) {
                 chosenXAxis = value;
+                clickedXvalue = value;
 
                 xLinearScale = xScale(healthdata, chosenXAxis);
                 xAxis = renderXAxes(xLinearScale, xAxis);
@@ -330,7 +371,8 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
         else if 
          (value === "income" || value === "age" || value === "poverty") {
             if (value !== chosenYAxis) {
-                chosenYAxis = value
+                chosenYAxis = value;
+                clickedYvalue = value
 
                 yLinearScale = yScale(healthdata, chosenYAxis);
                 yAxis = renderYAxes(yLinearScale, yAxis);
@@ -362,7 +404,6 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
                     povertyLabel
                         .classed("active", false)
                         .classed("inactive", true);    
-       
                     }
                 else if (chosenYAxis === "age") {
                     incomeLabel
@@ -395,7 +436,9 @@ d3.csv("assets/data/data.csv").then(function(healthdata, err)  {
         console.log(error);     
 });
 }
+
 makeResponsive();
 
 d3.select(window).on("resize", makeResponsive);
+
 
